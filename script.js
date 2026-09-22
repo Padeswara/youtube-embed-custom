@@ -1,5 +1,6 @@
 // Change this ID to update both the YouTube video and its thumbnail.
 const VIDEO_ID = 'lppWSHOX-Ck';
+document.querySelector('#youtube-link').href = `https://www.youtube.com/watch?v=${encodeURIComponent(VIDEO_ID)}`;
 
 const playButton = document.querySelector('#play');
 const startButton = document.querySelector('#start-play');
@@ -14,7 +15,6 @@ const stage = document.querySelector('.video-stage');
 const controls = document.querySelector('.control-bar');
 const seek = document.querySelector('#seek');
 const volume = document.querySelector('#volume');
-const speed = document.querySelector('#speed');
 const fullscreen = document.querySelector('#fullscreen');
 const playIcon = document.querySelector('#play-icon');
 const soundIcon = document.querySelector('#sound-icon');
@@ -26,7 +26,6 @@ const messages = {
   '-1': 'Siap diputar', 0: 'Video selesai', 1: 'Sedang diputar',
   2: 'Dijeda', 3: 'Memuat video…', 5: 'Siap diputar'
 };
-let rateOptions = '';
 let previousVolume = 100;
 let scrubbing = false;
 let syncTimer;
@@ -151,7 +150,7 @@ function showError(message) {
   playButton.disabled = true;
   startButton.disabled = true;
   muteButton.disabled = true;
-  seek.disabled = volume.disabled = speed.disabled = true;
+  seek.disabled = volume.disabled = true;
   clearInterval(syncTimer);
 }
 
@@ -193,18 +192,6 @@ function updateTimeline() {
   paintRange(seek);
 }
 
-function updateRates() {
-  const available = player.getAvailablePlaybackRates();
-  const rates = available.length ? available : [1];
-  const nextOptions = rates.join(',');
-  if (rateOptions !== nextOptions) {
-    speed.replaceChildren(...rates.map(rate => new Option(`${rate}×`, rate)));
-    rateOptions = nextOptions;
-  }
-  speed.value = String(player.getPlaybackRate());
-  speed.disabled = rates.length < 2;
-}
-
 function disableCaptions(target = player) {
   // Best effort: unloadModule is not part of the documented stable IFrame API.
   // Check loaded modules to avoid an unload/onApiChange event loop.
@@ -242,10 +229,6 @@ volume.addEventListener('input', () => {
   if (level > 0) player.unMute(); else player.mute();
   // Render the requested value without waiting for the iframe message round trip.
   updateSound(level === 0, level);
-  revealControls();
-});
-speed.addEventListener('change', () => {
-  if (ready) player.setPlaybackRate(Number(speed.value));
   revealControls();
 });
 fullscreen.hidden = !document.fullscreenEnabled || !stage.requestFullscreen;
@@ -291,7 +274,6 @@ window.onYouTubeIframeAPIReady = () => {
         statusLabel.classList.add('visually-hidden');
         showCover('idle');
         updateSound(true);
-        updateRates();
         updateTimeline();
         updateSyncTimer();
       },
@@ -312,10 +294,8 @@ window.onYouTubeIframeAPIReady = () => {
         playButton.setAttribute('aria-label', active ? 'Jeda video' : 'Putar video');
         statusLabel.textContent = messages[event.data] || 'Siap diputar';
         updateTimeline();
-        updateRates();
         updateSyncTimer();
       },
-      onPlaybackRateChange(event) { speed.value = String(event.data); },
       onApiChange(event) { disableCaptions(event.target); },
       onError(event) {
         const errors = { 2: 'ID video tidak valid.', 5: 'Video tidak dapat diputar di browser ini.', 100: 'Video tidak tersedia.', 101: 'Pemilik video menonaktifkan embed.', 150: 'Pemilik video menonaktifkan embed.', 153: 'Identitas situs tidak terbaca. Buka melalui localhost.' };
