@@ -1,9 +1,13 @@
+// Change this ID to update both the YouTube video and its thumbnail.
+const VIDEO_ID = 'lppWSHOX-Ck';
+
 const playButton = document.querySelector('#play');
 const startButton = document.querySelector('#start-play');
 const startIcon = document.querySelector('#start-icon');
 const muteButton = document.querySelector('#mute');
 const statusLabel = document.querySelector('#status');
 const poster = document.querySelector('#poster');
+const posterImage = document.querySelector('#poster img');
 const loading = document.querySelector('#loading');
 const videoWindow = document.querySelector('.video-window');
 const stage = document.querySelector('.video-stage');
@@ -30,6 +34,29 @@ let controlsTimer;
 let playing = false;
 let controlsIdle = false;
 let coverTimer;
+
+function loadThumbnail() {
+  const sizes = ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault'];
+  let nextSize = 0;
+
+  function tryNextSize() {
+    if (nextSize >= sizes.length) {
+      posterImage.hidden = true;
+      posterImage.removeAttribute('src');
+      return;
+    }
+    posterImage.src = `https://i.ytimg.com/vi/${encodeURIComponent(VIDEO_ID)}/${sizes[nextSize++]}.jpg`;
+  }
+
+  posterImage.addEventListener('error', tryNextSize);
+  posterImage.addEventListener('load', () => {
+    // YouTube can return a 120px placeholder even with a successful HTTP response.
+    if (posterImage.naturalWidth <= 120) tryNextSize();
+    else posterImage.hidden = false;
+  });
+  tryNextSize();
+}
+loadThumbnail();
 
 function fitVideoWindow() {
   const width = Math.min(stage.clientWidth, stage.clientHeight * 16 / 9);
@@ -243,7 +270,7 @@ const loadTimeout = setTimeout(() => showError('Video belum terhubung. Muat ulan
 
 window.onYouTubeIframeAPIReady = () => {
   player = new YT.Player('player', {
-    videoId: 'HKGPCYTsapI',
+    videoId: VIDEO_ID,
     width: '100%',
     height: '100%',
     playerVars: { controls: 0, disablekb: 1, playsinline: 1, rel: 0, fs: 0, cc_load_policy: 0, iv_load_policy: 3, origin: window.location.origin },
