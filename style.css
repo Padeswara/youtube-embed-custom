@@ -1,0 +1,361 @@
+:root {
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: #222;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+
+.video-container {
+  width: min(560px, calc(100% - 32px));
+}
+
+.video-stage {
+  container: video-player / inline-size;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #000;
+  border-radius: 16px;
+}
+
+/* Keep the visible video at 16:9, including portrait/fullscreen layouts.
+   Only the iframe height grows: its edge UI falls into clipped letterboxing. */
+.video-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#player {
+  position: absolute;
+  width: 100%;
+  height: calc(100% + 180px);
+  top: -90px;
+  left: 0;
+  border: 0;
+  pointer-events: none;
+}
+
+.video-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #000;
+  pointer-events: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.video-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.loading-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 3px solid #ffffff55;
+  border-top-color: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: loading-spin .8s linear infinite;
+}
+
+@keyframes loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+.control-bar {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  padding: 25px 14px 9px;
+  background: linear-gradient(transparent, #0009);
+  color: #fff;
+  opacity: 1;
+  transition: opacity .1s ease;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+}
+
+.controls-hidden .control-bar,
+.controls-hidden .start-play {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: .25s;
+}
+
+.controls-hidden {
+  cursor: none;
+}
+
+button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:hover:enabled, select:hover:enabled {
+  background: #ffffff25;
+}
+
+button:disabled, input:disabled, select:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.control-icon {
+  display: block;
+  pointer-events: none;
+  width: 18px;
+  height: 18px;
+}
+
+.start-play {
+  opacity: 1;
+  transition: opacity .1s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ff0000;
+  color: #fff;
+}
+
+.start-play .control-icon {
+  width: 26px;
+  height: 26px;
+  margin-left: 3px;
+}
+
+.start-play.is-playing .control-icon {
+  margin-left: 0;
+}
+
+.start-play:hover:enabled {
+  background: #cc0000;
+}
+
+.start-play:disabled {
+  opacity: 1;
+  background: #ff0000;
+}
+
+.time-display {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#speed {
+  margin-left: auto;
+  width: 48px;
+  height: 32px;
+  padding: 0;
+  appearance: none;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #fff;
+  font: bold 12px Arial, sans-serif;
+  text-align: center;
+  cursor: pointer;
+}
+
+#speed option {
+  color: #fff;
+  background: #222;
+}
+
+input[type=range] {
+  --progress: 0%;
+  --track-color: #fff;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 9px;
+  background: linear-gradient(to right, var(--track-color) var(--progress), #ffffff55 var(--progress));
+}
+
+input[type=range]::-moz-range-track {
+  height: 3px;
+  border-radius: 9px;
+  background: linear-gradient(to right, var(--track-color) var(--progress), #ffffff55 var(--progress));
+}
+
+input[type=range]::-webkit-slider-thumb {
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+input[type=range]::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+input.seek-slider {
+  width: 100%;
+  --track-color: #ff0000;
+}
+
+.seek-slider::-webkit-slider-thumb {
+  opacity: 0;
+}
+
+.seek-slider::-moz-range-thumb {
+  opacity: 0;
+}
+
+.seek-slider:hover::-webkit-slider-thumb, .seek-slider:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.seek-slider:hover::-moz-range-thumb, .seek-slider:focus-visible::-moz-range-thumb {
+  opacity: 1;
+}
+
+.volume-slider {
+  --expanded-width: 62px;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.video-stage:fullscreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+@media (max-width: 400px) {
+  .control-bar {
+    padding-inline: 10px;
+  }
+  .control-row {
+    gap: 4px;
+  }
+  .volume-slider {
+    --expanded-width: 40px;
+  }
+  .time-display {
+    font-size: 10px;
+  }
+  #speed {
+    width: 38px;
+  }
+}
+
+.volume-control .volume-slider {
+    width: 0;
+    margin-left: 0;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-4px);
+    pointer-events: none;
+    transition: width .2s ease, margin-left .2s ease, opacity .15s ease,
+      transform .2s ease, visibility 0s linear .2s;
+}
+
+.volume-control:hover .volume-slider,
+.volume-control:focus-within .volume-slider {
+    width: var(--expanded-width);
+    margin-left: 4px;
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .volume-control .volume-slider {
+    transition: none;
+    transform: none;
+  }
+  .loading-indicator { animation: none; }
+  .control-bar, .start-play {
+    transition: none;
+  }
+}
